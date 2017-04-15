@@ -4,16 +4,17 @@ import '../css/timeline.css';
 
 export default class Timeline extends Component {
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
         this.state = {
-            fotos: []
+            fotos: [],
+            login: this.props.login
         }
     }
 
-    carregaFotos(props){
-        const urlPerfil = !!props.login 
-        ? `http://localhost:8080/api/public/fotos/${props.login}` 
+    carregaFotos(){
+        const urlPerfil = !!this.login 
+        ? `http://localhost:8080/api/public/fotos/${this.login}` 
         : `http://localhost:8080/api/fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`
         
         fetch(urlPerfil)
@@ -24,12 +25,13 @@ export default class Timeline extends Component {
     }
 
     componentDidMount() {
-        this.carregaFotos(this.props);
+        this.carregaFotos();
     }
 
     componentWillReceiveProps(nextProps){
         if(!!nextProps.login){
-            this.carregaFotos(nextProps);
+            this.login = nextProps.login;
+            this.carregaFotos();
         }
     }
 

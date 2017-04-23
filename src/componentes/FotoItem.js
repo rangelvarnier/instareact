@@ -1,11 +1,37 @@
 import React, {Component} from 'react';
 import {Link} from 'react-router';
+import Pubsub from 'pubsub-js';
 
 class FotoAtualizacoes extends Component {
+
+  constructor(props){
+    super(props);
+    this.state = {likeada: this.props.foto.likeada};
+  }
+
+
+  like(event){
+    event.preventDefault();
+
+    fetch(`http://localhost:8080/api/fotos/${this.props.foto.id}/like?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`, {method: 'POST'})
+    .then(response => {
+      if(response.ok) {
+        return response.json();
+      }else{
+        throw new Error("não foi possivel realizar like na foto");
+      }
+    })
+    .then(liker => {
+      this.setState({likeada: !this.state.likeada});
+      Pubsub.publish('atualiza-liker', {fotoId: this.props.foto.id, liker});
+    })
+  }
+
   render() {
     return (
       <section className="fotoAtualizacoes">
-        <a href="#" className="fotoAtualizacoes-like">Likar</a>
+        <a onClick={this.like.bind(this)} 
+          className={this.state.likeada ? 'fotoAtualizacoes-like-ativo' : 'fotoAtualizacoes-like'}>Likar</a>
         <form className="fotoAtualizacoes-form">
           <input
             type="text"
@@ -23,6 +49,28 @@ class FotoAtualizacoes extends Component {
 }
 
 class FotoInfo extends Component {
+
+  constructor(props){
+    super(props);
+    this.state = {likers: this.props.foto.likers}
+
+  }
+
+  componentWillMount(){
+    Pubsub.subscribe('atualiza-liker', (topico, infoLiker) => {
+      if(this.props.foto.id === infoLiker.fotoId){
+        const possivelLiker = this.state.likers.find(liker => liker.login === infoLiker.liker.login);
+        if(possivelLiker === undefined){
+          const novosLikers = this.state.likers.concat(infoLiker.liker);
+          this.setState({likers : novosLikers});
+        }else{
+          const novosLikers = this.state.likers.filter(liker => liker.login !== infoLiker.liker.login);
+          this.setState({likers : novosLikers});
+        }
+      }
+    });
+  }
+
   render() {
     return (
       <div className="foto-in fo">
@@ -30,16 +78,12 @@ class FotoInfo extends Component {
           {this.props.foto.likers.lenght > 0
             ? 'curtiram'
             : ''}
-          {this
-            .props
-            .foto
-            .likers
-            .map(liker => {
+          {this.state.likers.map(liker => {
               return (
                 <Link key={liker.login} to={`/timeline/${liker.login}`}>{liker.login},</Link>
               )
             })
-}
+          }
 
         </div>
 
@@ -95,7 +139,7 @@ export default class FotoItem extends Component {
         <FotoHeader foto={this.props.foto}/>
         <img alt="foto" className="foto-src" src={this.props.foto.urlFoto}/>
         <FotoInfo foto={this.props.foto}/>
-        <FotoAtualizacoes/>
+        <FotoAtualizacoes foto={this.props.foto}/>
       </div>
     );
   }

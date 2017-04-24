@@ -18,27 +18,8 @@ class FotoAtualizacoes extends Component {
 
   comenta(event){
     event.preventDefault();
-
-    const requestInfo = {
-      method: 'POST',
-      body : JSON.stringify({texto:this.comentario.value}),
-      headers : new Headers({
-        'Content-type' : 'application/json'
-      })
-    }
-
-    fetch(`http://localhost:8080/api/fotos/${this.props.foto.id}/comment?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`, requestInfo)
-      .then(response => {
-        if(response.ok){
-          return response.json();
-        }else{
-          throw new Error("não foi possivel comentar");
-        }
-      })
-      .then(novoComentario => {
-        Pubsub.publish("novos-comentarios", {fotoId : this.props.foto.id, novoComentario});
-        this.comentario.value = '';
-      })
+    this.props.comenta(this.props.foto.id, this.comentario.value);
+    this.comentario.value = '';
   }
 
   render() {
@@ -70,7 +51,6 @@ class FotoInfo extends Component {
     this.state = {likers: this.props.foto.likers,
       comentarios : this.props.foto.comentarios  
     }
-
   }
 
   componentWillMount(){
@@ -158,7 +138,7 @@ export default class FotoItem extends Component {
         <FotoHeader foto={this.props.foto}/>
         <img alt="foto" className="foto-src" src={this.props.foto.urlFoto}/>
         <FotoInfo foto={this.props.foto} />
-        <FotoAtualizacoes foto={this.props.foto} like={this.props.like}/>
+        <FotoAtualizacoes foto={this.props.foto} like={this.props.like} comenta={this.props.comenta}/>
       </div>
     );
   }

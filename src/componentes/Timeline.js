@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import FotoItem from './FotoItem';
 import '../css/timeline.css';
-import Pubsub from 'pubsub-js';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
 import LogicaTimeline from '../logicas/LogicaTimeline';
 
@@ -21,12 +20,7 @@ export default class Timeline extends Component {
             ? `http://localhost:8080/api/public/fotos/${this.login}`
             : `http://localhost:8080/api/fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`
 
-        fetch(urlPerfil)
-            .then(retorno => retorno.json())
-            .then(fotos => {
-                this.setState({fotos: fotos})
-                this.logicaTimeline = new LogicaTimeline(fotos);
-            })
+        this.logicaTimeline.lista(urlPerfil);
     }
 
     like(fotoId) {
@@ -38,19 +32,9 @@ export default class Timeline extends Component {
     }
 
     componentWillMount() {
-        Pubsub.subscribe('timeline', (topico, fotos) => {
+        this.logicaTimeline.subscribe(fotos => {
             this.setState({fotos});
-        });
-
-        Pubsub.subscribe('novos-comentarios', (topico, infoComentario) => {
-            const fotoAchada = this.state.fotos
-                .find(foto => foto.id === infoComentario.fotoId);
-
-            fotoAchada.comentarios
-                .push(infoComentario.novoComentario);
-
-            this.setState({fotos: this.state.fotos});
-        });
+        })
     }
 
     componentDidMount() {

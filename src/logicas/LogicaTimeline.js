@@ -6,6 +6,15 @@ export default class LogicaTimeline{
         this.fotos = fotos;
     }
 
+    lista(urlPerfil){
+        fetch(urlPerfil)
+            .then(retorno => retorno.json())
+            .then(fotos => {
+                this.fotos = fotos;
+                Pubsub.publish('timeline', this.fotos);
+            });
+    }
+
     like(fotoId) {
         fetch(`http://localhost:8080/api/fotos/${fotoId}/like?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`, {method: 'POST'}).then(response => {
             if (response.ok) {
@@ -43,8 +52,17 @@ export default class LogicaTimeline{
                 throw new Error("não foi possivel comentar");
             }
         }).then(novoComentario => {
-            Pubsub.publish("novos-comentarios", {fotoId, novoComentario});
+            const fotoAchada = this.fotos.find(foto => foto.id === fotoId);
+            fotoAchada.comentarios.push(novoComentario);
+
+            Pubsub.publish('timeline', this.fotos);
         })
+    }
+
+    subscribe(callback){
+        Pubsub.subscribe('timeline', (topico, fotos) => {
+           callback(fotos);
+        });
     }
 
 }

@@ -2,17 +2,13 @@ import React, {Component} from 'react';
 import FotoItem from './FotoItem';
 import '../css/timeline.css';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
-import LogicaTimeline from '../logicas/LogicaTimeline';
 
 export default class Timeline extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            fotos: [],
-            login: this.props.login
-        }
-        this.logicaTimeline = new LogicaTimeline([]);
+        this.state = {fotos: []}
+        this.login = this.props.login
     }
 
     carregaFotos() {
@@ -20,19 +16,19 @@ export default class Timeline extends Component {
             ? `http://localhost:8080/api/public/fotos/${this.login}`
             : `http://localhost:8080/api/fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`
 
-        this.logicaTimeline.lista(urlPerfil);
+        this.props.store.lista(urlPerfil);
     }
 
     like(fotoId) {
-        this.logicaTimeline.like(fotoId);
+        this.props.store.like(fotoId);
     }
 
     comenta(fotoId, comentario) {
-        this.logicaTimeline.comenta(fotoId, comentario);
+        this.props.store.comenta(fotoId, comentario);
     }
 
     componentWillMount() {
-        this.logicaTimeline.subscribe(fotos => {
+        this.props.store.subscribe(fotos => {
             this.setState({fotos});
         })
     }

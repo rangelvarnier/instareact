@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import FotoItem from './FotoItem';
 import '../css/timeline.css';
 import ReactCSSTransitionGroup from 'react/lib/ReactCSSTransitionGroup';
+import TimelineApi from '../logicas/TimelineApi';
 
 export default class Timeline extends Component {
 
@@ -15,8 +16,8 @@ export default class Timeline extends Component {
         const urlPerfil = !!this.login
             ? `http://localhost:8080/api/public/fotos/${this.login}`
             : `http://localhost:8080/api/fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`
-
-        this.props.store.lista(urlPerfil);
+     
+        TimelineApi.lista(urlPerfil, this.props.store);
     }
 
     like(fotoId) {
@@ -28,8 +29,8 @@ export default class Timeline extends Component {
     }
 
     componentWillMount() {
-        this.props.store.subscribe(fotos => {
-            this.setState({fotos});
+        this.props.store.subscribe(() => {
+            this.setState({fotos:this.props.store.getState()});
         })
     }
 

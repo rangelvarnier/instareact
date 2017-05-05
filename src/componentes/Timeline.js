@@ -17,7 +17,7 @@ export default class Timeline extends Component {
             ? `http://localhost:8080/api/public/fotos/${this.login}`
             : `http://localhost:8080/api/fotos?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`
      
-        TimelineApi.lista(urlPerfil, this.props.store);
+        this.props.store.dispatch(TimelineApi.lista(urlPerfil));
     }
 
     like(fotoId) {

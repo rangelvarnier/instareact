@@ -6,12 +6,15 @@ export default class TimelineApi{
         this.fotos = fotos;
     }
 
-    static lista(urlPerfil, store){
-        fetch(urlPerfil)
-            .then(retorno => retorno.json())
-            .then(fotos => {
-                store.dispatch({type: 'LISTAGEM',fotos})
-            });
+    static lista(urlPerfil){
+        return dispatch => {
+            fetch(urlPerfil)
+                .then(retorno => retorno.json())
+                .then(fotos => {
+                    dispatch({type: 'LISTAGEM',fotos})
+                    return fotos;
+                });
+        }
     }
 
     like(fotoId) {

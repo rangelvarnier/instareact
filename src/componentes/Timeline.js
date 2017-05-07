@@ -8,8 +8,8 @@ export default class Timeline extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {fotos: []}
-        this.login = this.props.login
+        this.state = {fotos: []};
+        this.login = this.props.login;
     }
 
     carregaFotos() {
@@ -25,7 +25,7 @@ export default class Timeline extends Component {
     }
 
     comenta(fotoId, comentario) {
-        this.props.store.comenta(fotoId, comentario);
+        this.props.store.dispatch(TimelineApi.comenta(fotoId, comentario));
     }
 
     componentWillMount() {

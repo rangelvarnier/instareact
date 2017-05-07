@@ -1,24 +1,29 @@
 import Pubsub from 'pubsub-js';
 
-export default class TimelineApi{
+export default class TimelineApi {
 
-    constructor(fotos){
+    constructor(fotos) {
         this.fotos = fotos;
     }
 
-    static lista(urlPerfil){
+    static lista(urlPerfil) {
         return dispatch => {
             fetch(urlPerfil)
                 .then(retorno => retorno.json())
                 .then(fotos => {
-                    dispatch({type: 'LISTAGEM',fotos})
+                    dispatch({
+                        type: 'LISTAGEM',
+                        fotos
+                    });
                     return fotos;
                 });
         }
     }
 
     like(fotoId) {
-        fetch(`http://localhost:8080/api/fotos/${fotoId}/like?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`, {method: 'POST'}).then(response => {
+        fetch(`http://localhost:8080/api/fotos/${fotoId}/like?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`, {
+            method: 'POST'
+        }).then(response => {
             if (response.ok) {
                 return response.json();
             } else {
@@ -40,30 +45,37 @@ export default class TimelineApi{
     }
 
 
-    comenta(fotoId, comentario) {
-        const requestInfo = {
-            method: 'POST',
-            body: JSON.stringify({texto: comentario}),
-            headers: new Headers({'Content-type': 'application/json'})
-        }
-
-        fetch(`http://localhost:8080/api/fotos/${fotoId}/comment?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`, requestInfo).then(response => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                throw new Error("não foi possivel comentar");
+    static comenta(fotoId, comentario) {
+        return dispatch => {
+            const requestInfo = {
+                method: 'POST',
+                body: JSON.stringify({
+                    texto: comentario
+                }),
+                headers: new Headers({
+                    'Content-type': 'application/json'
+                })
             }
-        }).then(novoComentario => {
-            const fotoAchada = this.fotos.find(foto => foto.id === fotoId);
-            fotoAchada.comentarios.push(novoComentario);
 
-            Pubsub.publish('timeline', this.fotos);
-        })
+            fetch(`http://localhost:8080/api/fotos/${fotoId}/comment?X-AUTH-TOKEN=${localStorage.getItem('auth-token')}`, requestInfo).then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error("não foi possivel comentar");
+                }
+            }).then(novoComentario => {
+                dispatch({
+                    type: 'COMENTARIO',
+                    fotoId,
+                    novoComentario
+                });
+            });
+        }
     }
 
-    subscribe(callback){
+    subscribe(callback) {
         Pubsub.subscribe('timeline', (topico, fotos) => {
-           callback(fotos);
+            callback(fotos);
         });
     }
 

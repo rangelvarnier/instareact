@@ -1,3 +1,5 @@
+import { listagem, like, comentario } from '../actions/actionCreator';
+
 export default class TimelineApi {
 
     static lista(urlPerfil) {
@@ -5,10 +7,7 @@ export default class TimelineApi {
             fetch(urlPerfil)
                 .then(retorno => retorno.json())
                 .then(fotos => {
-                    dispatch({
-                        type: 'LISTAGEM',
-                        fotos
-                    });
+                    dispatch(listagem(fotos));
                     return fotos;
                 });
         }
@@ -25,23 +24,19 @@ export default class TimelineApi {
                     throw new Error("não foi possivel realizar like na foto");
                 }
             }).then(liker => {
-                dispatch({
-                    type: 'LIKE',
-                    fotoId,
-                    liker
-                });
+                dispatch(like(fotoId, liker));
                 return liker;
             })
         }
     }
 
 
-    static comenta(fotoId, comentario) {
+    static comenta(fotoId, textoComentario) {
         return dispatch => {
             const requestInfo = {
                 method: 'POST',
                 body: JSON.stringify({
-                    texto: comentario
+                    texto: textoComentario
                 }),
                 headers: new Headers({
                     'Content-type': 'application/json'
@@ -55,11 +50,7 @@ export default class TimelineApi {
                     throw new Error("não foi possivel comentar");
                 }
             }).then(novoComentario => {
-                dispatch({
-                    type: 'COMENTARIO',
-                    fotoId,
-                    novoComentario
-                });
+                dispatch(comentario(fotoId, novoComentario));
                 return novoComentario;
             });
         }

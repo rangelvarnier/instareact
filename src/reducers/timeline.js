@@ -1,4 +1,6 @@
-import {List} from 'immutable';
+import {
+    List
+} from 'immutable';
 
 export function timeline(state = new List(), action) {
     if (action.type === 'LISTAGEM') {
@@ -9,7 +11,9 @@ export function timeline(state = new List(), action) {
         const fotoEstadoAntigo = state.find(foto => foto.id === action.fotoId);
         const novosComentarios = fotoEstadoAntigo.comentarios.concat(action.novoComentario);
 
-        const fotoEstadoNovo = Object.assign({}, fotoEstadoAntigo, {comentarios:novosComentarios})
+        const fotoEstadoNovo = Object.assign({}, fotoEstadoAntigo, {
+            comentarios: novosComentarios
+        })
 
         const indiceDaLista = state.findIndex(foto => foto.id === action.fotoId);
         const novaLista = state.set(indiceDaLista, fotoEstadoNovo);
@@ -18,17 +22,25 @@ export function timeline(state = new List(), action) {
     }
 
     if (action.type === 'LIKE') {
-        const fotoAchada = state.find(foto => foto.id === action.fotoId);
-        fotoAchada.likeada = !fotoAchada.likeada;
-        const possivelLiker = fotoAchada.likers.find(likerAtual => likerAtual.login === action.liker.login);
+        const fotoEstadoAntigo = state.find(foto => foto.id === action.fotoId);
+        fotoEstadoAntigo.likeada = !fotoEstadoAntigo.likeada;
+        const possivelLiker = fotoEstadoAntigo.likers.find(likerAtual => likerAtual.login === action.liker.login);
 
+        let novosLikers;
         if (possivelLiker === undefined) {
-            fotoAchada.likers.push(action.liker);
+            novosLikers = fotoEstadoAntigo.likers.concat(action.liker);
         } else {
-            const novosLikers = fotoAchada.likers.filter(likerAtual => likerAtual.login !== action.liker.login);
-            fotoAchada.likers = novosLikers;
+            novosLikers = fotoEstadoAntigo.likers.filter(likerAtual => likerAtual.login !== action.liker.login);
         }
-        return state;
+
+        const fotoEstadoNovo = Object.assign({}, fotoEstadoAntigo, {
+            likers: novosLikers
+        })
+
+        const indiceDaLista = state.findIndex(foto => foto.id === action.fotoId);
+        const novaLista = state.set(indiceDaLista, fotoEstadoNovo);
+
+        return novaLista;
     }
     return state;
 }

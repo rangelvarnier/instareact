@@ -43,7 +43,7 @@ export function timeline(state = new List(), action) {
                 likers: novosLikers
             };
         });
-
     }
+
     return state;
 }

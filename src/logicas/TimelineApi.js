@@ -1,4 +1,9 @@
-import { listagem, like, comentario } from '../actions/actionCreator';
+import {
+    listagem,
+    like,
+    comentario,
+    notifica
+} from '../actions/actionCreator';
 
 export default class TimelineApi {
 
@@ -30,7 +35,6 @@ export default class TimelineApi {
         }
     }
 
-
     static comenta(fotoId, textoComentario) {
         return dispatch => {
             const requestInfo = {
@@ -53,6 +57,25 @@ export default class TimelineApi {
                 dispatch(comentario(fotoId, novoComentario));
                 return novoComentario;
             });
+        }
+    }
+
+    static pesquisa(loginPesquisa) {
+        return dispatch => {
+            if(!!loginPesquisa){
+                fetch(`http://localhost:8080/api/public/fotos/${loginPesquisa}/`)
+                    .then(response => response.json())
+                    .then(fotos => {
+                        if(fotos.length === 0){
+                            dispatch(notifica('usuário não encontrado'));
+                        }else{
+                            dispatch(notifica(''));
+                        }
+
+                        dispatch(listagem(fotos));
+                        return fotos;
+                });
+            }
         }
     }
 }

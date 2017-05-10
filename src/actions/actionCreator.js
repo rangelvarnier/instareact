@@ -20,3 +20,10 @@ export function comentario(fotoId, novoComentario) {
         novoComentario
     };
 }
+
+export function notifica(msg) {
+    return {
+        type: 'NOTIFICA',
+        msg
+    };
+}
